@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "Monk Mode - Focus Chrome Extension",
   "scripts": {
-    "dev": "bun build --watch",
-    "build": "bun build"
+    "dev": "bun build src/background/index.ts src/popup/popup.ts src/content/index.ts --outdir dist --watch",
+    "build": "bun build src/background/index.ts src/popup/popup.ts src/content/index.ts --outdir dist",
+    "test": "bun test"
   },
   "license": "ISC",
   "packageManager": "pnpm@10.10.0",
