@@ -1,5 +1,9 @@
 node_modules/
 dist/
+package-lock.json
 *.local
 .env
 .env.*
+
+# Mac system files
+.DS_Store
