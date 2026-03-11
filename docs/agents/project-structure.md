@@ -37,6 +37,9 @@ src/
     └── constants.ts           # Default durations, alarm name
 ```
 
+## More details
+- See `docs/agents/ui-spec.md` for screen layouts and tab structure
+
 ## Notes
 - `src/shared/` is imported by all contexts — keep it free of browser-context-specific APIs
 - Components in `src/popup/components/` are plain TS functions that return/mutate DOM elements (no framework)

@@ -22,4 +22,5 @@ Focus - Monkmode is a Chrome Manifest V3 extension built with the Bun bundler an
 - [Timer](docs/agents/timer.md)
 - [blocker](docs/agents/blocker.md)
 - [Coding style & naming](docs/agents/coding-style.md)
+- [UI spec](docs/agents/ui-spec.md)
 
