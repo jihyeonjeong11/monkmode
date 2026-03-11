@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>집중 모드 활성화 중</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #1a202c;
+      font-family: system-ui, sans-serif;
+      color: #e2e8f0;
+    }
+    .card {
+      text-align: center;
+      padding: 48px 40px;
+      background: #2d3748;
+      border-radius: 16px;
+      max-width: 420px;
+      width: 90%;
+    }
+    .emoji { font-size: 64px; margin-bottom: 16px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
+    p { font-size: 15px; color: #a0aec0; line-height: 1.6; margin-bottom: 28px; }
+    button {
+      padding: 10px 24px;
+      background: #4a5568;
+      color: #e2e8f0;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="emoji">🧘</div>
+    <h1>집중 모드 활성화 중</h1>
+    <p>지금은 Monk Mode가 켜져 있습니다.<br />이 사이트는 차단되어 있습니다.</p>
+    <button onclick="history.back()">← 이전 페이지로 돌아가기</button>
+  </div>
+</body>
+</html>

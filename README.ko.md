@@ -1,4 +1,4 @@
-# Monkmode
+# Focus - Monkmode
 
 Modern, customizazble Monk mode producticity application built with Vite bundler. Developed using [agentic coding](https://cloud.google.com/discover/what-is-agentic-coding).
 
