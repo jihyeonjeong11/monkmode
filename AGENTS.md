@@ -1,18 +1,25 @@
 # Project Overview
 
-Hacker News Companion is a cross-browser (Chrome + Firefox) Manifest V3 extension built with WXT that enhances `news.ycombinator.com`.
+Focus - Monkmode is a Chrome Manifest V3 extension built with the Bun bundler and Typescript.
 
-- Core features: Vim-style keyboard navigation, hover user previews (via `hn.algolia.com`), and an injected resizable summary panel.
-- Summaries: Load cached summaries from `app.hncompanion.com` or generate fresh AI summaries using local Ollama or cloud LLM providers (OpenAI, Anthropic, Google, OpenRouter).
-- Key code-paths: `src/entrypoints/content/hnenhancer.js` (page enhancer + UI), `src/entrypoints/background/index.js` (MV3 service worker: fetch + LLM calls), `src/entrypoints/options/` (settings UI), `src/lib/` (shared summarizer + utilities).
+- Core Features: A customizable Pomodoro timer with a web blocker and a session tracker for reflections. When a user navigates to a restricted website, a reflection page appears, providing meditation instructions and a one-liner form for later reflection.
+- Key code-paths:
+    - `src/popup/popup.ts` + `src/popup/components/` (Popup UI & Interaction)
+    - `src/background/index.ts` (Service Worker: Timer alarms & DNR rule sync)
+    - `src/content/index.ts` (Reflection overlay injection on blocked sites)
+    - `src/block-page/index.html` (Static block redirect page)
+    - `src/shared/` (types, messages, constants — shared across all contexts)
 
 # Repository Guidelines
 
-## Essentials
+## Beforehand
 - Package manager: pnpm (see packageManager in package.json).
 - Dev build: ask the user to run `pnpm run dev`; do not run it automatically.
 
 ## More details
 - [Project structure](docs/agents/project-structure.md)
 - [State management](docs/agents/state-management.md)
+- [Timer](docs/agents/timer.md)
+- [blocker](docs/agents/blocker.md)
 - [Coding style & naming](docs/agents/coding-style.md)
+
