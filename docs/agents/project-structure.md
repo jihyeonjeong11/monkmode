@@ -34,7 +34,9 @@ src/
 └── shared/
     ├── types.ts               # AppState, TimerState, SessionEntry
     ├── messages.ts            # Message union type + sendMessage helpers
-    └── constants.ts           # Default durations, alarm name
+    ├── constants.ts           # Default durations, alarm name
+    ├── errors.ts              # MonkModeError + StorageError, AlarmError, DnrError, MessageError
+    └── logger.ts              # createLogger(context) — prefix + error code 포함 출력
 ```
 
 ## More details
