@@ -78,22 +78,41 @@ export async function handleAlarm(alarm: chrome.alarms.Alarm): Promise<void> {
   state.timer.endTime = null;
   await saveState(state);
 
-  await playAlarmSound();
+  await playSound();
 }
 
-async function playAlarmSound(): Promise<void> {
-  // chrome.offscreen.getContexts may not be typed in older @types/chrome
-  const offscreen = chrome.offscreen as typeof chrome.offscreen & {
-    getContexts: (filter: object) => Promise<unknown[]>;
-  };
-  const contexts = await offscreen.getContexts({});
-  if (contexts.length === 0) {
-    await chrome.offscreen.createDocument({
-      url: chrome.runtime.getURL("offscreen.html"),
-      reasons: [chrome.offscreen.Reason.AUDIO_PLAYBACK],
-      justification: "타이머 종료 알림음 재생",
-    });
-  }
+/**
+ * Plays audio files from extension service workers
+ * @param {string} source - path of the audio file
+ * @param {number} volume - volume of the playback
+ */
+async function playSound(source = 'assets/sounds/alarm.wav', volume = 1) {
+    await createOffscreen();
+    await chrome.runtime.sendMessage({ play: { source, volume } });
 }
+
+  // 첫번째 환각 기록할것
+  // chrome.offscreen.getContexts may not be typed in older @types/chrome
+  // const offscreen = chrome.offscreen as typeof chrome.offscreen & {
+  //   getContexts: (filter: object) => Promise<unknown[]>;
+  // };
+  // const contexts = await offscreen.getContexts({});
+  // if (contexts.length === 0) {
+  //   await chrome.offscreen.createDocument({
+  //     url: chrome.runtime.getURL("offscreen.html"),
+  //     reasons: [chrome.offscreen.Reason.AUDIO_PLAYBACK],
+  //     justification: "타이머 종료 알림음 재생",
+  //   });
+  // }
+
+// Create the offscreen document if it doesn't already exist
+async function createOffscreen() {
+    if (await chrome.offscreen.hasDocument()) return;
+    await chrome.offscreen.createDocument({
+        url: 'offscreen.html',
+        reasons: ['AUDIO_PLAYBACK'],
+        justification: 'testing' // details for using the API
+    });
+  } 
 
 chrome.alarms.onAlarm.addListener(handleAlarm);

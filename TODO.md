@@ -9,39 +9,32 @@
 **목표:** 모든 컨텍스트(background, popup, content)가 공유하는 타입·메시지·상수 정의
 
 ### `src/shared/types.ts`
-- [ ] `TimerPhase` enum: `FOCUS | SHORT_BREAK | LONG_BREAK`
-- [ ] `TimerState` 타입: `phase`, `remainingSeconds`, `isRunning`, `completedPomodoros`
-- [ ] `SessionEntry` 타입: `id`, `startedAt` (timestamp), `durationMinutes`, `reflection` (string | null)
-- [ ] `AppState` 타입: `timer: TimerState`, `blockedSites: string[]`, `isActive: boolean`, `sessions: SessionEntry[]`
+- [x] `TimerPhase` enum: `FOCUS | SHORT_BREAK | LONG_BREAK`
+- [x] `TimerState` 타입: `phase`, `endTime` (절대 timestamp), `isRunning`, `completedPomodoros`
+- [x] `SessionEntry` 타입: `id`, `startedAt` (timestamp), `durationMinutes`, `reflection` (string | null)
+- [x] `AppState` 타입: `timer: TimerState`, `blockedSites: string[]`, `isActive: boolean`, `sessions: SessionEntry[]`
 
 ### `src/shared/errors.ts`
-- [ ] `MonkModeError` base class (extends `Error`): `code`, `message`
-- [ ] `StorageError` — `chrome.storage` 읽기/쓰기 실패
-- [ ] `AlarmError` — `chrome.alarms` 등록/해제 실패
-- [ ] `DnrError` — `declarativeNetRequest` 규칙 동기화 실패
-- [ ] `MessageError` — 메시지 송수신 실패 (unknown sender 등)
+- [x] `MonkModeError` base class (extends `Error`): `code`, `message`
+- [x] `StorageError` — `chrome.storage` 읽기/쓰기 실패
+- [x] `AlarmError` — `chrome.alarms` 등록/해제 실패
+- [x] `DnrError` — `declarativeNetRequest` 규칙 동기화 실패
+- [x] `MessageError` — 메시지 송수신 실패 (unknown sender 등)
 
 ### `src/shared/logger.ts`
-- [ ] 컨텍스트 prefix 상수: `[background]`, `[popup]`, `[content]`, `[block-page]`
-- [ ] `createLogger(context)` → `{ log, warn, error }` 반환
-  - 출력 형식: `[context] message` + 에러면 `MonkModeError.code` 포함
-- [ ] 각 컨텍스트 진입점에서 `const logger = createLogger("background")` 식으로 초기화
+- [x] 컨텍스트 prefix 상수: `[background]`, `[popup]`, `[content]`, `[block-page]`
+- [x] `createLogger(context)` → `{ log, warn, error }` 반환
+- [x] 각 컨텍스트 진입점에서 `const logger = createLogger("background")` 식으로 초기화
 
 ### `src/shared/constants.ts`
-- [ ] `ALARM_NAME = "pomodoro-tick"`
-- [ ] `DEFAULT_FOCUS_MINUTES = 25`
-- [ ] `DEFAULT_SHORT_BREAK_MINUTES = 5`
-- [ ] `DEFAULT_LONG_BREAK_MINUTES = 15`
-- [ ] `POMODOROS_UNTIL_LONG_BREAK = 4`
+- [x] `ALARM_NAME = "monk-mode-phase-end"`
+- [x] `DEFAULT_FOCUS_MINUTES = 240` (4시간), `MIN/MAX_FOCUS_MINUTES = 60/240`
+- [x] `DEFAULT_SHORT_BREAK_MINUTES = 30`, `DEFAULT_LONG_BREAK_MINUTES = 60`
+- [x] `POMODOROS_UNTIL_LONG_BREAK = 4`
 
 ### `src/shared/messages.ts`
-- [ ] Message union 타입 정의:
-  - `START_TIMER` / `PAUSE_TIMER` / `RESET_TIMER` / `SKIP_PHASE`
-  - `GET_STATE` → 응답: `AppState`
-  - `ADD_SITE` / `REMOVE_SITE` (payload: `site: string`)
-  - `TOGGLE_BLOCKER` (payload: `isActive: boolean`)
-  - `SAVE_REFLECTION` (payload: `SessionEntry`)
-- [ ] `sendMessage<T>(msg)` 헬퍼 함수
+- [x] Message union 타입 정의: `START_TIMER` / `PAUSE_TIMER` / `RESET_TIMER` / `SKIP_PHASE` / `GET_STATE` / `ADD_SITE` / `REMOVE_SITE` / `TOGGLE_BLOCKER` / `SAVE_REFLECTION`
+- [x] `sendMessage<T>(msg)` 헬퍼 함수
 
 ---
 
@@ -53,21 +46,23 @@
 
 **의존:** `feat/shared-foundation`
 
+### `src/background/storage.ts`
+- [x] `loadState()` — `chrome.storage.local`에서 `AppState` 로드 (기본값 포함)
+- [x] `saveState(state)` — `chrome.storage.local.set`으로 저장
+
+### `src/background/timer.ts`
+- [x] `IS_TEST` 플래그 — true 시 10초 타이머로 동작
+- [x] `startTimer()` — `endTime = Date.now() + duration`, 단일 알람 등록
+- [x] `pauseTimer()` — 알람 제거, `isRunning = false`, `endTime = null`
+- [x] `resetTimer()` — 알람 제거, `isRunning = false`, `endTime = null`
+- [x] `handleAlarm()` — FOCUS 완료 시 `SessionEntry` 저장, 다음 페이즈 알람 등록
+- [x] `playSound()` — offscreen document 생성 후 `assets/sounds/alarm.wav` 재생 (5초 후 종료)
+
 ### `src/background/index.ts`
-- [ ] `chrome.storage.local`에서 `AppState` 로드 (`initState`)
-- [ ] `chrome.alarms.create(ALARM_NAME, { periodInMinutes: 1/60 })` — 매 초 tick
-- [ ] `chrome.alarms.onAlarm` 리스너:
-  - `remainingSeconds` 1씩 감소
-  - 0이 되면 페이즈 전환 (`FOCUS → SHORT_BREAK → ...`)
-  - `completedPomodoros` 4 도달 시 `LONG_BREAK`
-  - 페이즈 완료 시 `SessionEntry` 저장 (focus 페이즈만)
-  - 상태를 `chrome.storage.local.set`으로 저장
-- [ ] `chrome.runtime.onMessage` 리스너:
-  - `START_TIMER`: 알람 생성 + `isRunning = true`
-  - `PAUSE_TIMER`: 알람 제거 + `isRunning = false`
-  - `RESET_TIMER`: 알람 제거 + 현재 페이즈 시간 초기화
-  - `SKIP_PHASE`: 다음 페이즈로 전환
-  - `GET_STATE`: 현재 AppState 반환
+- [x] `chrome.runtime.onMessage` 리스너: `START_TIMER`, `PAUSE_TIMER`, `RESET_TIMER`, `GET_STATE`, `OFFSCREEN_DONE`
+
+### `src/background/timer.test.ts`
+- [x] `startTimer`, `pauseTimer`, `resetTimer`, `handleAlarm` 테스트 작성 (스텁 기반)
 
 ---
 
@@ -83,7 +78,7 @@
 
 ### `src/popup/components/PhaseIndicator.ts`
 - [ ] `FOCUS / SHORT BREAK / LONG BREAK` 텍스트 표시
-- [ ] 완료된 뽀모도로 개수를 점(● ○)으로 표시
+- [ ] 완료된 태스크 개수를 점(● ○)으로 표시
 
 ### `src/popup/components/TimerDisplay.ts`
 - [ ] `remainingSeconds`를 `MM:SS` 형식으로 렌더링
@@ -181,4 +176,5 @@
 - [ ] `manifest.json`에 `declarativeNetRequest` 권한 확인
 - [ ] `manifest.json`에 `storage`, `alarms` 권한 확인
 - [ ] `build.ts` (또는 `package.json` scripts)에 `block-page` 엔트리 추가 여부 확인
+- [x] `build.ts`에 `src/assets` → `dist/assets` 복사 추가
 - [ ] 각 브랜치 완료 후 `pnpm run dev`로 로컬 동작 확인

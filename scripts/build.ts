@@ -10,6 +10,7 @@ function copyAssets() {
   copyFileSync("src/block-page/index.html", "dist/block-page.html");
   copyFileSync("src/offscreen/offscreen.html", "dist/offscreen.html");
   cpSync("images", "dist/images", { recursive: true });
+  cpSync("src/assets", "dist/assets", { recursive: true });
   console.log("Assets copied.");
 }
 

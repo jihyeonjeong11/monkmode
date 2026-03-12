@@ -47,6 +47,7 @@ export async function fireMockAlarm(name: string): Promise<void> {
     getDynamicRules: async () => [],
   },
   offscreen: {
+    hasDocument: async () => false,
     getContexts: async () => [],
     createDocument: async () => {},
     closeDocument: async () => {},

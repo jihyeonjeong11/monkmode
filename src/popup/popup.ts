@@ -10,7 +10,6 @@ const pauseBtn = document.getElementById("pause-btn");
 const resetBtn = document.getElementById("reset-btn");
 
 let tickInterval: ReturnType<typeof setInterval> | null = null;
-let prevPhase: TimerPhase | null = null;
 
 function formatSeconds(secs: number): string {
   const m = Math.floor(secs / 60).toString().padStart(2, "0");
@@ -52,22 +51,6 @@ function stopTick() {
   }
 }
 
-function playDing() {
-  try {
-    const ctx = new AudioContext();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(880, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.5);
-    gain.gain.setValueAtTime(0.6, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 1.2);
-  } catch {}
-}
 
 startBtn.addEventListener("click", () => {
   chrome.runtime.sendMessage({ type: "START_TIMER" });
@@ -143,9 +126,6 @@ chrome.storage.onChanged.addListener((changes) => {
   chrome.storage.local.get(DEFAULT_STORAGE).then((data) => {
     const state = data as AppState;
 
-    if (prevPhase != null && prevPhase !== state.timer.phase) playDing();
-    prevPhase = state.timer.phase;
-
     renderTimer(state);
     if (state.timer.isRunning && state.timer.endTime != null) {
       startTick(state.timer.endTime);
@@ -167,7 +147,6 @@ async function load() {
   const data = await chrome.storage.local.get(DEFAULT_STORAGE);
   const state = data as AppState;
 
-  prevPhase = state.timer.phase;
   renderTimer(state);
   if (state.timer.isRunning && state.timer.endTime != null) {
     startTick(state.timer.endTime);

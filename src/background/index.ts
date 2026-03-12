@@ -11,7 +11,6 @@ chrome.runtime.onMessage.addListener(
 
 async function handleMessage(msg: Message | { type: "OFFSCREEN_DONE" }): Promise<unknown> {
   const { startTimer, pauseTimer, resetTimer } = await import("./timer");
-
   switch (msg.type) {
     case "START_TIMER":
       await startTimer();
