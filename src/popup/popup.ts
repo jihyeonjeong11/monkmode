@@ -1,3 +1,4 @@
+// @ts-nocheck — 임시 스캐폴드, Branch 3(feat/popup-timer-ui)에서 전면 교체 예정
 const toggleBtn = document.getElementById("toggle-btn");
 const siteInput = document.getElementById("site-input");
 const addBtn = document.getElementById("add-btn");

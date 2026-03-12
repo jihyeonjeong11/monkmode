@@ -1,8 +1,25 @@
 // Manual mock for Chrome extension APIs
 // Usage: import "./src/__mocks__/chrome" at the top of test files
 
-const storage: Record<string, unknown> = {};
+// --- Storage ---
+let storage: Record<string, unknown> = {};
 
+export function resetMockStorage(): void {
+  storage = {};
+}
+
+// --- Alarms ---
+type AlarmListener = (alarm: chrome.alarms.Alarm) => void;
+const alarmListeners: AlarmListener[] = [];
+
+export function fireMockAlarm(name: string): void {
+  const alarm = { name, scheduledTime: Date.now() } as chrome.alarms.Alarm;
+  for (const listener of alarmListeners) {
+    listener(alarm);
+  }
+}
+
+// --- Global mock ---
 (globalThis as unknown as { chrome: typeof chrome }).chrome = {
   storage: {
     local: {
@@ -13,7 +30,9 @@ const storage: Record<string, unknown> = {};
   alarms: {
     create: () => {},
     clear: async () => true,
-    onAlarm: { addListener: () => {} },
+    onAlarm: {
+      addListener: (listener: AlarmListener) => { alarmListeners.push(listener); },
+    },
   },
   runtime: {
     sendMessage: async () => {},
