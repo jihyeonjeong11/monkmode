@@ -47,7 +47,9 @@
 
 ## Branch 2: `feat/timer-core`
 
-**목표:** Background 서비스 워커에서 Pomodoro 타이머 동작 구현
+**목표:** Background 서비스 워커에서 Monk mode 타이머 동작 구현
+
+> ⚠️ 브레이크 타임(SHORT_BREAK, LONG_BREAK)은 현재 구현하지 않음. 타입·상수는 보존.
 
 **의존:** `feat/shared-foundation`
 
