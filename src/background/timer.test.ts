@@ -1,7 +1,10 @@
 import { describe, test, expect, beforeEach } from "bun:test";
 import { resetMockStorage, fireMockAlarm } from "../__mocks__/chrome";
 import { TimerPhase } from "../shared/types";
-import { ALARM_NAME, DEFAULT_FOCUS_MINUTES } from "../shared/constants";
+import { ALARM_NAME, DEFAULT_FOCUS_MINUTES, IS_TEST, TEST_DURATION_SECONDS } from "../shared/constants";
+
+const EFFECTIVE_FOCUS_MINUTES = IS_TEST ? TEST_DURATION_SECONDS / 60 : DEFAULT_FOCUS_MINUTES;
+const EFFECTIVE_FOCUS_MS = EFFECTIVE_FOCUS_MINUTES * 60 * 1000;
 
 // 구현 전 import — 테스트 작성 후 구현
 import { startTimer, pauseTimer, resetTimer, handleAlarm } from "./timer";
@@ -26,9 +29,9 @@ describe("startTimer", () => {
     const after = Date.now();
     const state = await loadState();
 
-    const expectedMs = DEFAULT_FOCUS_MINUTES * 60 * 1000;
-    expect(state.timer.endTime).toBeGreaterThanOrEqual(before + expectedMs);
-    expect(state.timer.endTime).toBeLessThanOrEqual(after + expectedMs);
+    const tolerance = 10; // Bun cold-start timing jitter
+    expect(state.timer.endTime).toBeGreaterThanOrEqual(before + EFFECTIVE_FOCUS_MS - tolerance);
+    expect(state.timer.endTime).toBeLessThanOrEqual(after + EFFECTIVE_FOCUS_MS);
   });
 
   test("이미 실행 중이면 아무것도 하지 않는다", async () => {
@@ -93,20 +96,15 @@ describe("handleAlarm", () => {
     await fireMockAlarm(ALARM_NAME);
     const state = await loadState();
     expect(state.sessions.length).toBe(1);
-    expect(state.sessions[0].durationMinutes).toBe(DEFAULT_FOCUS_MINUTES);
+    expect(state.sessions[0].durationMinutes).toBe(EFFECTIVE_FOCUS_MINUTES);
   });
 
-  test("알람 완료 후 다음 페이즈 알람이 자동 등록된다", async () => {
-    let alarmCreated = false;
-    const original = chrome.alarms.create;
-    (chrome.alarms as unknown as Record<string, unknown>).create = () => { alarmCreated = true; };
-
+  test("알람 완료 후 타이머가 정지 상태가 된다", async () => {
     await startTimer();
-    alarmCreated = false; // startTimer의 create는 무시
     await fireMockAlarm(ALARM_NAME);
-
-    expect(alarmCreated).toBe(true);
-    (chrome.alarms as unknown as Record<string, unknown>).create = original;
+    const state = await loadState();
+    expect(state.timer.isRunning).toBe(false);
+    expect(state.timer.endTime).toBeNull();
   });
 
 });

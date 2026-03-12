@@ -12,10 +12,10 @@ export function resetMockStorage(): void {
 type AlarmListener = (alarm: chrome.alarms.Alarm) => void;
 const alarmListeners: AlarmListener[] = [];
 
-export function fireMockAlarm(name: string): void {
+export async function fireMockAlarm(name: string): Promise<void> {
   const alarm = { name, scheduledTime: Date.now() } as chrome.alarms.Alarm;
   for (const listener of alarmListeners) {
-    listener(alarm);
+    await listener(alarm);
   }
 }
 
@@ -45,5 +45,11 @@ export function fireMockAlarm(name: string): void {
   declarativeNetRequest: {
     updateDynamicRules: async () => {},
     getDynamicRules: async () => [],
+  },
+  offscreen: {
+    getContexts: async () => [],
+    createDocument: async () => {},
+    closeDocument: async () => {},
+    Reason: { AUDIO_PLAYBACK: "AUDIO_PLAYBACK" },
   },
 } as unknown as typeof chrome;

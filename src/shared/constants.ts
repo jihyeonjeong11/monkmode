@@ -6,3 +6,7 @@ export const DEFAULT_FOCUS_MINUTES = 240;
 export const DEFAULT_SHORT_BREAK_MINUTES = 30;
 export const DEFAULT_LONG_BREAK_MINUTES = 60;
 export const POMODOROS_UNTIL_LONG_BREAK = 4;
+
+// --- 인간 테스트용 ---
+export const IS_TEST = true;
+export const TEST_DURATION_SECONDS = 10;
