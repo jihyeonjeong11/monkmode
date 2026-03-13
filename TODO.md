@@ -111,23 +111,23 @@
 **의존:** `feat/shared-foundation`, `feat/timer-core`
 
 ### `src/background/index.ts` (추가)
-- [ ] `syncDnrRules(isActive: boolean, blockedSites: string[])` 함수:
+- [x] `syncDnrRules(isActive: boolean, blockedSites: string[])` 함수:
   - `isActive === false`: `chrome.declarativeNetRequest.updateDynamicRules`로 기존 규칙 전체 제거
   - `isActive === true`: `blockedSites` 각 항목을 DNR 규칙으로 변환
     - `urlFilter: "||{site}"`, `resourceTypes: ["main_frame"]`
     - `action: { type: "redirect", redirect: { extensionPath: "/block-page.html" } }`
-- [ ] `TOGGLE_BLOCKER` / `ADD_SITE` / `REMOVE_SITE` 메시지 처리 후 `syncDnrRules` 호출
+- [x] `TOGGLE_BLOCKER` / `ADD_SITE` / `REMOVE_SITE` 메시지 처리 후 `syncDnrRules` 호출
 
 ### `src/popup/components/SiteInput.ts`
-- [ ] URL 입력 필드 + 추가 버튼
-- [ ] `https://`, 후행 `/` 제거 정규화
-- [ ] Enter 키 지원
-- [ ] `onAdd(site: string)` 콜백
+- [x] URL 입력 필드 + 추가 버튼
+- [x] `https://`, 후행 `/` 제거 정규화
+- [x] Enter 키 지원
+- [x] `onAdd(site: string)` 콜백
 
 ### `src/popup/components/SiteList.ts`
-- [ ] 차단 목록 렌더링
-- [ ] 각 항목에 `[✕]` 제거 버튼
-- [ ] 빈 목록 안내 메시지
+- [x] 차단 목록 렌더링
+- [x] 각 항목에 `[✕]` 제거 버튼
+- [x] 빈 목록 안내 메시지
 
 ---
 
