@@ -13,7 +13,7 @@ type AlarmListener = (alarm: chrome.alarms.Alarm) => void;
 const alarmListeners: AlarmListener[] = [];
 
 // Mutable state object — avoids closure-over-let issues in Bun's transpiler
-export const mockErrors = {
+const mockErrors = {
   alarm: null as Error | null,
   storage: null as Error | null,
   dnr: null as Error | null,
