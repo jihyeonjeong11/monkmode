@@ -94,7 +94,7 @@
 
 ### CSS
 - [x] `--bg`, `--fg`, `--border` CSS 변수 적용 (라이트/다크 모노톤)
-- [x] `prefers-color-scheme: dark` 미디어 쿼리
+- [ ] `prefers-color-scheme: dark` 미디어 쿼리 → `feat/dark-mode` 브랜치에서 구현
 
 ### `src/popup/popup.ts`
 - [x] 기존 코드 교체 — 컴포넌트 기반으로 재작성
@@ -167,7 +167,31 @@
 
 ---
 
-## Branch 7: `feat/content-script` _(선택)_
+## develop (개선 및 버그픽스)
+
+- [x] IS_TEST 환경변수 → 하드코딩 상수로 전환
+- [x] `state.timer undefined` 크래시 방어 (`withDefaults`)
+- [x] TimerDisplay HH:MM:SS 형식 (1시간 이상)
+- [x] 타이머 대기 화면: `--:--` 대신 선택된 시간 표시
+- [x] Stop 확인 문구: `"A disciplined mind leads to happiness."`
+- [x] Chrome API 전 레이어 에러 핸들링 + logger 연동
+- [x] mock `structuredClone` 딥카피 버그 수정
+
+---
+
+## Branch 7: `feat/dark-mode`
+
+**목표:** 다크모드 지원 (시스템 `prefers-color-scheme` 자동 적용)
+
+**의존:** `feat/popup-timer-ui`
+
+### CSS
+- [ ] `prefers-color-scheme: dark` 미디어 쿼리 적용
+- [ ] 팝업 / 블록 페이지 모두 적용
+
+---
+
+## Branch 8: `feat/content-script` _(선택)_
 
 **목표:** content script 역할 확정 후 구현
 
@@ -181,6 +205,6 @@
 
 - [ ] `manifest.json`에 `declarativeNetRequest` 권한 확인
 - [ ] `manifest.json`에 `storage`, `alarms` 권한 확인
-- [ ] `build.ts` (또는 `package.json` scripts)에 `block-page` 엔트리 추가 여부 확인
+- [x] `build.ts`에 `block-page` 엔트리 추가
 - [x] `build.ts`에 `src/assets` → `dist/assets` 복사 추가
 - [ ] 각 브랜치 완료 후 `pnpm run dev`로 로컬 동작 확인

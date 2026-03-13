@@ -13,7 +13,7 @@ import { renderSiteList } from "./components/SiteList";
 import { renderSessionsView } from "./components/SessionsView";
 
 // --- Stop confirmation phrase ---
-const STOP_PHRASE = "메시지를 수정해주세요";
+const STOP_PHRASE = "A disciplined mind leads to happiness.";
 
 // --- DOM refs ---
 const phaseLabel = document.getElementById("phase-label") as HTMLElement;
