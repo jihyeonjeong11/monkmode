@@ -5,6 +5,8 @@ import { sendMessage } from "../shared/messages";
 import { renderTimerDisplay } from "./components/TimerDisplay";
 import { renderPhaseIndicator } from "./components/PhaseIndicator";
 import { renderTimerControls } from "./components/TimerControls";
+import { initSiteInput } from "./components/SiteInput";
+import { renderSiteList } from "./components/SiteList";
 
 // --- Stop confirmation phrase ---
 const STOP_PHRASE = "메시지를 수정해주세요";
@@ -160,40 +162,19 @@ function confirmStop() {
 }
 
 // --- Blocklist ---
-function renderSiteList(sites: string[]) {
-  siteList.innerHTML = "";
-  if (sites.length === 0) {
-    const li = document.createElement("li");
-    li.className = "site-list-empty";
-    li.textContent = "차단할 사이트를 추가하세요";
-    siteList.appendChild(li);
-    return;
-  }
-  for (const site of sites) {
-    const li = document.createElement("li");
-    li.className = "site-item";
-    li.innerHTML = `<span>${site}</span><button class="remove-btn" data-site="${site}">✕</button>`;
-    siteList.appendChild(li);
-  }
-}
-
-addBtn.addEventListener("click", addSite);
-siteInput.addEventListener("keydown", (e) => { if (e.key === "Enter") addSite(); });
-
-function addSite() {
-  const site = siteInput.value.trim().toLowerCase()
-    .replace(/^https?:\/\//, "")
-    .replace(/\/$/, "");
-  if (!site) return;
-  siteInput.value = "";
-  sendMessage({ type: "ADD_SITE", site });
-}
-
-siteList.addEventListener("click", (e) => {
-  const btn = (e.target as HTMLElement).closest<HTMLElement>(".remove-btn");
-  if (!btn?.dataset.site) return;
-  sendMessage({ type: "REMOVE_SITE", site: btn.dataset.site });
+initSiteInput({
+  inputEl: siteInput,
+  addBtnEl: addBtn,
+  onAdd: (site) => sendMessage({ type: "ADD_SITE", site }),
 });
+
+function renderBlocklist(sites: string[]) {
+  renderSiteList({
+    containerEl: siteList,
+    sites,
+    onRemove: (site) => sendMessage({ type: "REMOVE_SITE", site }),
+  });
+}
 
 // --- Sessions ---
 function pad2(n: number) { return n.toString().padStart(2, "0"); }
@@ -232,7 +213,7 @@ chrome.storage.onChanged.addListener(() => {
     const state = data as unknown as AppState;
     appState = state;
     renderTimer(state);
-    renderSiteList(state.blockedSites ?? []);
+    renderBlocklist(state.blockedSites ?? []);
     renderSessions(state.sessions ?? []);
   });
 });
