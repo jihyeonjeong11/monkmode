@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach } from "bun:test";
 import { JSDOM } from "jsdom";
-import { resetMockStorage } from "../__mocks__/chrome";
+import { resetMockStorage, resetStorageError, resetAlarmError } from "../__mocks__/chrome";
 import { initBlockPage } from "./block-page";
 
 let dom: JSDOM;
@@ -8,6 +8,8 @@ let closedTabId: number | null = null;
 
 beforeEach(() => {
   resetMockStorage();
+  resetStorageError();
+  resetAlarmError();
   closedTabId = null;
   dom = new JSDOM(`
     <div id="container">

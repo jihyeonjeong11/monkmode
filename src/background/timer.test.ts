@@ -1,7 +1,8 @@
 import { describe, test, expect, beforeEach } from "bun:test";
-import { resetMockStorage, fireMockAlarm } from "../__mocks__/chrome";
+import { resetMockStorage, fireMockAlarm, simulateAlarmError, resetAlarmError, resetStorageError } from "../__mocks__/chrome";
 import { TimerPhase } from "../shared/types";
 import { ALARM_NAME, DEFAULT_FOCUS_MINUTES, IS_TEST, TEST_DURATION_SECONDS } from "../shared/constants";
+import { AlarmError } from "../shared/errors";
 
 const EFFECTIVE_FOCUS_MINUTES = IS_TEST ? TEST_DURATION_SECONDS / 60 : DEFAULT_FOCUS_MINUTES;
 const EFFECTIVE_FOCUS_MS = EFFECTIVE_FOCUS_MINUTES * 60 * 1000;
@@ -12,6 +13,8 @@ import { loadState } from "./storage";
 
 beforeEach(() => {
   resetMockStorage();
+  resetAlarmError();
+  resetStorageError();
 });
 
 // --- startTimer ---
@@ -36,6 +39,16 @@ describe("startTimer", () => {
 
   // pnpm test 는 IS_TEST=true 로 실행 → selectedMinutes 무시, 10초 타이머 사용
   // IS_TEST=false 환경(실제 extension)에서는 selectedMinutes 를 사용함을 보장
+
+  test("chrome.alarms.create 실패 시 AlarmError를 던진다", async () => {
+    const original = chrome.alarms.create;
+    (chrome.alarms as unknown as Record<string, unknown>).create = () => { throw new Error("alarms unavailable"); };
+    try {
+      await expect(startTimer()).rejects.toThrow(AlarmError);
+    } finally {
+      (chrome.alarms as unknown as Record<string, unknown>).create = original;
+    }
+  });
 
   test("이미 실행 중이면 아무것도 하지 않는다", async () => {
     await startTimer();
@@ -62,6 +75,17 @@ describe("pauseTimer", () => {
     const state = await loadState();
     expect(state.timer.endTime).toBeNull();
   });
+
+  test("chrome.alarms.clear 실패 시 AlarmError를 던진다", async () => {
+    await startTimer();
+    const original = chrome.alarms.clear;
+    (chrome.alarms as unknown as Record<string, unknown>).clear = async () => { throw new Error("alarms unavailable"); };
+    try {
+      await expect(pauseTimer()).rejects.toThrow(AlarmError);
+    } finally {
+      (chrome.alarms as unknown as Record<string, unknown>).clear = original;
+    }
+  });
 });
 
 // --- resetTimer ---
@@ -79,6 +103,17 @@ describe("resetTimer", () => {
     await resetTimer();
     const state = await loadState();
     expect(state.timer.endTime).toBeNull();
+  });
+
+  test("chrome.alarms.clear 실패 시 AlarmError를 던진다", async () => {
+    await startTimer();
+    const original = chrome.alarms.clear;
+    (chrome.alarms as unknown as Record<string, unknown>).clear = async () => { throw new Error("alarms unavailable"); };
+    try {
+      await expect(resetTimer()).rejects.toThrow(AlarmError);
+    } finally {
+      (chrome.alarms as unknown as Record<string, unknown>).clear = original;
+    }
   });
 
   test("페이즈와 completedPomodoros는 유지한다", async () => {

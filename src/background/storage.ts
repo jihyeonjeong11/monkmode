@@ -1,6 +1,7 @@
 import type { AppState } from "../shared/types";
 import { TimerPhase } from "../shared/types";
 import { DEFAULT_FOCUS_MINUTES } from "../shared/constants";
+import { StorageError } from "../shared/errors";
 
 const DEFAULT_STATE: AppState = {
   timer: {
@@ -15,10 +16,18 @@ const DEFAULT_STATE: AppState = {
 };
 
 export async function loadState(): Promise<AppState> {
-  const data = await chrome.storage.local.get(DEFAULT_STATE as unknown as Record<string, unknown>);
-  return data as unknown as AppState;
+  try {
+    const data = await chrome.storage.local.get(DEFAULT_STATE as unknown as Record<string, unknown>);
+    return data as unknown as AppState;
+  } catch (cause) {
+    throw new StorageError("loadState 실패", cause);
+  }
 }
 
 export async function saveState(state: AppState): Promise<void> {
-  await chrome.storage.local.set(state);
+  try {
+    await chrome.storage.local.set(state);
+  } catch (cause) {
+    throw new StorageError("saveState 실패", cause);
+  }
 }

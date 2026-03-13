@@ -1,10 +1,17 @@
+import { DnrError } from "../shared/errors";
+
 export async function syncDnrRules(
   isActive: boolean,
   blockedSites: string[]
 ): Promise<void> {
-  const existing = await chrome.declarativeNetRequest.getDynamicRules();
-  const removeRuleIds = existing.map((r) => r.id);
+  let existing: chrome.declarativeNetRequest.Rule[];
+  try {
+    existing = await chrome.declarativeNetRequest.getDynamicRules();
+  } catch (cause) {
+    throw new DnrError("getDynamicRules 실패", cause);
+  }
 
+  const removeRuleIds = existing.map((r) => r.id);
   const addRules: chrome.declarativeNetRequest.Rule[] = isActive
     ? blockedSites.map((site, i) => ({
         id: i + 1,
@@ -20,5 +27,9 @@ export async function syncDnrRules(
       }))
     : [];
 
-  await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules });
+  try {
+    await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules });
+  } catch (cause) {
+    throw new DnrError("updateDynamicRules 실패", cause);
+  }
 }

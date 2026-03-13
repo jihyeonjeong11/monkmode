@@ -2,6 +2,9 @@ import type { AppState, SessionEntry } from "../shared/types";
 import { TimerPhase } from "../shared/types";
 import { DEFAULT_FOCUS_MINUTES } from "../shared/constants";
 import { sendMessage } from "../shared/messages";
+import { createLogger } from "../shared/logger";
+
+const logger = createLogger("popup");
 import { renderTimerDisplay } from "./components/TimerDisplay";
 import { renderPhaseIndicator } from "./components/PhaseIndicator";
 import { renderTimerControls } from "./components/TimerControls";
@@ -207,20 +210,26 @@ chrome.storage.onChanged.addListener(() => {
     renderTimer(state);
     renderBlocklist(state.blockedSites);
     renderSessions(state.sessions);
+  }).catch((err) => {
+    logger.error("storage.onChanged 상태 로드 실패", err);
   });
 });
 
 // --- Initial load ---
 async function load() {
-  const stored = await chrome.storage.local.get(null);
-  const data = stored as Record<string, unknown>;
+  try {
+    const stored = await chrome.storage.local.get(null);
+    const data = stored as Record<string, unknown>;
 
-  if (data.selectedMinutes) selectedMinutes = data.selectedMinutes as number;
+    if (data.selectedMinutes) selectedMinutes = data.selectedMinutes as number;
 
-  appState = withDefaults(data);
-  renderTimer(appState);
-  renderBlocklist(appState.blockedSites);
-  renderSessions(appState.sessions);
+    appState = withDefaults(data);
+    renderTimer(appState);
+    renderBlocklist(appState.blockedSites);
+    renderSessions(appState.sessions);
+  } catch (err) {
+    logger.error("초기 상태 로드 실패", err);
+  }
 }
 
 load();

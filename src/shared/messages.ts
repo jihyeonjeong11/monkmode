@@ -1,4 +1,5 @@
 import type { AppState, SessionEntry } from "./types";
+import { MessageError } from "./errors";
 
 export type Message =
   | { type: "START_TIMER" }
@@ -17,5 +18,9 @@ export type MessageResponse<T extends Message["type"]> =
 export async function sendMessage<T extends Message>(
   msg: T
 ): Promise<MessageResponse<T["type"]>> {
-  return chrome.runtime.sendMessage(msg);
+  try {
+    return await chrome.runtime.sendMessage(msg);
+  } catch (cause) {
+    throw new MessageError("sendMessage 실패", cause);
+  }
 }

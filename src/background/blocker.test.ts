@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, mock } from "bun:test";
-import { resetMockStorage } from "../__mocks__/chrome";
+import { resetMockStorage, resetStorageError, resetAlarmError, resetDnrError } from "../__mocks__/chrome";
+import { DnrError } from "../shared/errors";
 import { syncDnrRules } from "./blocker";
 
 // updateDynamicRules 호출 기록을 추적하기 위한 스파이
@@ -7,6 +8,9 @@ let lastUpdateCall: { removeRuleIds: number[]; addRules: chrome.declarativeNetRe
 
 beforeEach(() => {
   resetMockStorage();
+  resetStorageError();
+  resetAlarmError();
+  resetDnrError();
   lastUpdateCall = null;
 
   (globalThis as any).chrome.declarativeNetRequest.updateDynamicRules = async (
@@ -61,5 +65,30 @@ describe("syncDnrRules — isActive: true", () => {
   test("사이트가 없으면 기존 규칙만 제거한다", async () => {
     await syncDnrRules(true, []);
     expect(lastUpdateCall!.addRules).toHaveLength(0);
+  });
+});
+
+describe("syncDnrRules — 에러 처리", () => {
+  test("getDynamicRules 실패 시 DnrError를 던진다", async () => {
+    const original = (chrome.declarativeNetRequest as any).getDynamicRules;
+    (chrome.declarativeNetRequest as any).getDynamicRules = async () => { throw new Error("dnr unavailable"); };
+    try {
+      await expect(syncDnrRules(true, ["youtube.com"])).rejects.toThrow(DnrError);
+    } finally {
+      (chrome.declarativeNetRequest as any).getDynamicRules = original;
+    }
+  });
+
+  test("updateDynamicRules 실패 시 DnrError를 던진다", async () => {
+    const cause = new Error("update failed");
+    const original = (chrome.declarativeNetRequest as any).updateDynamicRules;
+    (chrome.declarativeNetRequest as any).updateDynamicRules = async () => { throw cause; };
+    try {
+      const err = await syncDnrRules(false, []).catch((e) => e);
+      expect(err).toBeInstanceOf(DnrError);
+      expect((err as DnrError).cause).toBe(cause);
+    } finally {
+      (chrome.declarativeNetRequest as any).updateDynamicRules = original;
+    }
   });
 });

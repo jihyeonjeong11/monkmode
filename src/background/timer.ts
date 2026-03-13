@@ -11,6 +11,7 @@ import {
 } from "../shared/constants";
 import { loadState, saveState } from "./storage";
 import { syncDnrRules } from "./blocker";
+import { AlarmError } from "../shared/errors";
 
 function getPhaseDurationMinutes(phase: TimerPhase): number {
   if (IS_TEST) return TEST_DURATION_SECONDS / 60;
@@ -45,7 +46,11 @@ export async function startTimer(): Promise<void> {
   state.timer.endTime = now + durationMinutes * 60 * 1000;
   await saveState(state);
 
-  chrome.alarms.create(ALARM_NAME, { delayInMinutes: durationMinutes });
+  try {
+    chrome.alarms.create(ALARM_NAME, { delayInMinutes: durationMinutes });
+  } catch (cause) {
+    throw new AlarmError("알람 등록 실패", cause);
+  }
 }
 
 export async function pauseTimer(): Promise<void> {
@@ -53,7 +58,11 @@ export async function pauseTimer(): Promise<void> {
   state.timer.isRunning = false;
   state.timer.endTime = null;
   await saveState(state);
-  await chrome.alarms.clear(ALARM_NAME);
+  try {
+    await chrome.alarms.clear(ALARM_NAME);
+  } catch (cause) {
+    throw new AlarmError("알람 해제 실패", cause);
+  }
 }
 
 export async function resetTimer(): Promise<void> {
@@ -61,7 +70,11 @@ export async function resetTimer(): Promise<void> {
   state.timer.isRunning = false;
   state.timer.endTime = null;
   await saveState(state);
-  await chrome.alarms.clear(ALARM_NAME);
+  try {
+    await chrome.alarms.clear(ALARM_NAME);
+  } catch (cause) {
+    throw new AlarmError("알람 해제 실패", cause);
+  }
 }
 
 export async function handleAlarm(alarm: chrome.alarms.Alarm): Promise<void> {
