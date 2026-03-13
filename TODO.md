@@ -138,16 +138,16 @@
 **의존:** `feat/shared-foundation`
 
 ### `src/block-page/index.html`
-- [ ] UI 스펙대로 레이아웃:
+- [x] UI 스펙대로 레이아웃:
   - `🧘` 아이콘
   - "집중 모드 활성 중" 제목
   - 명상 안내 문구 ("잠깐 멈추고 호흡을 가다듬으세요...")
   - 텍스트 입력 ("왜 이 사이트에 왔나요?")
   - "기록하고 돌아가기" 버튼
-- [ ] 제출 시:
+- [x] 제출 시:
   - `SessionEntry` 생성 후 `chrome.storage.local`에 append
-  - `history.back()` 또는 `chrome.tabs.goBack()`으로 이전 페이지 복귀
-- [ ] 인라인 `<script>` 또는 별도 `block-page.ts` 빌드 엔트리
+  - 탭 닫기 (`chrome.tabs.remove`)
+- [x] 인라인 `<script>` 또는 별도 `block-page.ts` 빌드 엔트리
 
 ---
 

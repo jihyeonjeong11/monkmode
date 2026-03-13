@@ -4,10 +4,17 @@ export interface SiteInputOptions {
   onAdd: (site: string) => void;
 }
 
+export function isValidSiteUrl(url: string): boolean {
+  return /^[a-zA-Z0-9][a-zA-Z0-9\-\.]*\.[a-zA-Z]{2,}$/.test(url);
+}
+
 export function initSiteInput({ inputEl, addBtnEl, onAdd }: SiteInputOptions): void {
   function submit() {
     const value = normalizeSiteUrl(inputEl.value.trim());
-    if (!value) return;
+    if (!value || !isValidSiteUrl(value)) {
+      inputEl.value = "";
+      return;
+    }
     onAdd(value);
     inputEl.value = "";
   }

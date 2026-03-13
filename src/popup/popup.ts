@@ -227,7 +227,7 @@ async function load() {
 
   appState = data as AppState;
   renderTimer(appState);
-  renderSiteList(appState.blockedSites ?? []);
+  renderBlocklist(appState.blockedSites ?? []);
   renderSessions(appState.sessions ?? []);
 }
 

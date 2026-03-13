@@ -16,24 +16,26 @@ function copyAssets() {
 
 copyAssets();
 
-const entries: [string, string][] = [
-  ["src/background/index.ts", "dist/background.js"],
-  ["src/content/index.ts", "dist/content.js"],
-  ["src/popup/popup.ts", "dist/popup/popup.js"],
-  ["src/offscreen/offscreen.ts", "dist/offscreen.js"],
+// [entry, outfile, extraFlags]
+const entries: [string, string, string[]][] = [
+  ["src/background/index.ts", "dist/background.js", []],
+  ["src/content/index.ts", "dist/content.js", ["--format=iife"]],
+  ["src/popup/popup.ts", "dist/popup/popup.js", []],
+  ["src/offscreen/offscreen.ts", "dist/offscreen.js", []],
+  ["src/block-page/main.ts", "dist/block-page.js", []],
 ];
 
 if (isWatch) {
-  const procs = entries.map(([entry, outfile]) =>
-    Bun.spawn(["bun", "build", entry, "--outfile", outfile, "--watch"], {
+  const procs = entries.map(([entry, outfile, flags]) =>
+    Bun.spawn(["bun", "build", entry, "--outfile", outfile, "--watch", ...flags], {
       stdout: "inherit",
       stderr: "inherit",
     })
   );
   await Promise.all(procs.map((p) => p.exited));
 } else {
-  for (const [entry, outfile] of entries) {
-    const proc = Bun.spawnSync(["bun", "build", entry, "--outfile", outfile], {
+  for (const [entry, outfile, flags] of entries) {
+    const proc = Bun.spawnSync(["bun", "build", entry, "--outfile", outfile, ...flags], {
       stdout: "inherit",
       stderr: "inherit",
     });

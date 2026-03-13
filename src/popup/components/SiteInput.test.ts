@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach } from "bun:test";
 import { JSDOM } from "jsdom";
-import { initSiteInput, normalizeSiteUrl } from "./SiteInput";
+import { initSiteInput, normalizeSiteUrl, isValidSiteUrl } from "./SiteInput";
 
 let dom: JSDOM;
 
@@ -46,6 +46,28 @@ describe("normalizeSiteUrl", () => {
   });
 });
 
+describe("isValidSiteUrl", () => {
+  test("유효한 도메인을 허용한다", () => {
+    expect(isValidSiteUrl("example.com")).toBe(true);
+  });
+
+  test("서브도메인을 허용한다", () => {
+    expect(isValidSiteUrl("www.youtube.com")).toBe(true);
+  });
+
+  test("점이 없으면 거부한다", () => {
+    expect(isValidSiteUrl("notaurl")).toBe(false);
+  });
+
+  test("공백이 있으면 거부한다", () => {
+    expect(isValidSiteUrl("example .com")).toBe(false);
+  });
+
+  test("빈 문자열을 거부한다", () => {
+    expect(isValidSiteUrl("")).toBe(false);
+  });
+});
+
 describe("initSiteInput", () => {
   test("추가 버튼 클릭 시 onAdd가 호출된다", () => {
     const calls: string[] = [];
@@ -81,6 +103,29 @@ describe("initSiteInput", () => {
 
     addBtnEl.click();
     expect(calls).toHaveLength(0);
+  });
+
+  test("유효하지 않은 URL이면 onAdd가 호출되지 않는다", () => {
+    const calls: string[] = [];
+    const inputEl = document.getElementById("site-input") as HTMLInputElement;
+    const addBtnEl = document.getElementById("add-btn")!;
+
+    inputEl.value = "notaurl";
+    initSiteInput({ inputEl, addBtnEl, onAdd: (s) => calls.push(s) });
+
+    addBtnEl.click();
+    expect(calls).toHaveLength(0);
+  });
+
+  test("유효하지 않은 URL이면 입력창을 비운다", () => {
+    const inputEl = document.getElementById("site-input") as HTMLInputElement;
+    const addBtnEl = document.getElementById("add-btn")!;
+
+    inputEl.value = "notaurl";
+    initSiteInput({ inputEl, addBtnEl, onAdd: () => {} });
+
+    addBtnEl.click();
+    expect(inputEl.value).toBe("");
   });
 
   test("Enter 키로도 onAdd가 호출된다", () => {

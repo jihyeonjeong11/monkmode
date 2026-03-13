@@ -16,3 +16,7 @@ Monkmode is a browser extension that helps you focus for given time for just one
 - 🎵 Sound alerts for timer completion and button clicks
 - ❓ Comprehensive help guide with instructions and productivity tips
 - ⚡ Debug mode for testing (add `?debug=true` to URL)
+
+## Assets
+
+- Alarm sound from https://freesound.org/people/joedeshon/sounds/78562/
