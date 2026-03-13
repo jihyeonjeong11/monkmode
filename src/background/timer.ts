@@ -12,6 +12,9 @@ import {
 import { loadState, saveState } from "./storage";
 import { syncDnrRules } from "./blocker";
 import { AlarmError } from "../shared/errors";
+import { createLogger } from "../shared/logger";
+
+const logger = createLogger("background");
 
 function getPhaseDurationMinutes(phase: TimerPhase): number {
   if (IS_TEST) return TEST_DURATION_SECONDS / 60;
@@ -101,7 +104,11 @@ export async function handleAlarm(alarm: chrome.alarms.Alarm): Promise<void> {
   await saveState(state);
   await syncDnrRules(false, state.blockedSites);
 
-  await playSound();
+  try {
+    await playSound();
+  } catch (err) {
+    logger.error("알림음 재생 실패", err);
+  }
 }
 
 /**
@@ -130,12 +137,14 @@ async function playSound(source = 'assets/sounds/alarm.wav', volume = 1) {
 
 // Create the offscreen document if it doesn't already exist
 async function createOffscreen() {
-    if (await chrome.offscreen.hasDocument()) return;
-    await chrome.offscreen.createDocument({
-        url: 'offscreen.html',
-        reasons: ['AUDIO_PLAYBACK'],
-        justification: 'testing' // details for using the API
-    });
-  } 
+  if (await chrome.offscreen.hasDocument()) return;
+  await chrome.offscreen.createDocument({
+    url: 'offscreen.html',
+    reasons: ['AUDIO_PLAYBACK'],
+    justification: 'timer completion alarm sound',
+  });
+  // Wait for the document's onMessage listener to register
+  await new Promise((r) => setTimeout(r, 100));
+}
 
 chrome.alarms.onAlarm.addListener(handleAlarm);

@@ -11,11 +11,17 @@
       --border: #E0E0E0;
     }
     @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0A0A0A;
-        --fg: #FFFFFF;
-        --border: #2A2A2A;
-      }
+      :root { --bg: #0A0A0A; --fg: #FFFFFF; --border: #2A2A2A; }
+    }
+    html[data-theme="dark"] {
+      --bg: #0A0A0A;
+      --fg: #FFFFFF;
+      --border: #2A2A2A;
+    }
+    html[data-theme="light"] {
+      --bg: #FFFFFF;
+      --fg: #0A0A0A;
+      --border: #E0E0E0;
     }
 
     body {
@@ -32,6 +38,16 @@
       font-size: 16px;
       font-weight: 700;
       border-bottom: 1px solid var(--border);
+    }
+    #theme-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0;
+      margin-right: 6px;
+      vertical-align: middle;
+      line-height: 1;
     }
 
     /* Tab content */
@@ -235,7 +251,7 @@
   </style>
 </head>
 <body>
-  <header>🧘 Monk Mode</header>
+  <header><button id="theme-toggle">🌙</button> Monk Mode</header>
 
   <!-- Timer tab -->
   <div id="tab-timer" class="tab-panel active">

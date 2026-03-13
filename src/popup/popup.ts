@@ -15,6 +15,24 @@ import { renderSessionsView } from "./components/SessionsView";
 // --- Stop confirmation phrase ---
 const STOP_PHRASE = "A disciplined mind leads to happiness.";
 
+// --- Theme toggle ---
+const themeToggle = document.getElementById("theme-toggle") as HTMLButtonElement;
+
+function applyTheme(dark: boolean) {
+  document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  themeToggle.textContent = dark ? "☀️" : "🌙";
+}
+
+const savedTheme = localStorage.getItem("theme");
+const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+applyTheme(savedTheme ? savedTheme === "dark" : prefersDark);
+
+themeToggle.addEventListener("click", () => {
+  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  applyTheme(!isDark);
+  localStorage.setItem("theme", !isDark ? "dark" : "light");
+});
+
 // --- DOM refs ---
 const phaseLabel = document.getElementById("phase-label") as HTMLElement;
 const timerDisplay = document.getElementById("timer-display") as HTMLElement;
@@ -157,6 +175,9 @@ stopCancelBtn.addEventListener("click", () => {
 
 stopOkBtn.addEventListener("click", confirmStop);
 stopInput.addEventListener("keydown", (e) => { if (e.key === "Enter") confirmStop(); });
+stopInput.addEventListener("paste", (e) => e.preventDefault());
+stopInput.addEventListener("copy", (e) => e.preventDefault());
+stopInput.addEventListener("cut", (e) => e.preventDefault());
 
 function confirmStop() {
   if (stopInput.value.trim() !== STOP_PHRASE) return;
