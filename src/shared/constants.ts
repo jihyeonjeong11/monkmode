@@ -7,6 +7,6 @@ export const DEFAULT_SHORT_BREAK_MINUTES = 30;
 export const DEFAULT_LONG_BREAK_MINUTES = 60;
 export const POMODOROS_UNTIL_LONG_BREAK = 4;
 
-// --- 인간 테스트용 (pnpm dev:env 시 IS_TEST=true 로 주입됨) ---
-export const IS_TEST = process.env.IS_TEST === "true";
+// --- 인간 테스트용: 10초 타이머가 필요하면 true 로 변경 ---
+export const IS_TEST = false;
 export const TEST_DURATION_SECONDS = 10;

@@ -101,7 +101,7 @@ function renderTimer(state: AppState) {
     renderTimerDisplay(timerDisplay, remaining);
     startTick(endTime);
   } else {
-    renderTimerDisplay(timerDisplay, null);
+    renderTimerDisplay(timerDisplay, selectedMinutes * 60);
     stopTick();
   }
 
@@ -182,28 +182,45 @@ function renderSessions(sessions: SessionEntry[]) {
   renderSessionsView({ summaryEl: sessionsSummary, listEl: sessionsList, sessions });
 }
 
+// --- State defaults ---
+const DEFAULT_TIMER_STATE = {
+  phase: "FOCUS" as const,
+  endTime: null,
+  isRunning: false,
+  completedPomodoros: 0,
+};
+
+function withDefaults(data: Record<string, unknown>): AppState {
+  return {
+    timer: (data.timer as AppState["timer"]) ?? DEFAULT_TIMER_STATE,
+    blockedSites: (data.blockedSites as string[]) ?? [],
+    isActive: (data.isActive as boolean) ?? false,
+    sessions: (data.sessions as AppState["sessions"]) ?? [],
+  };
+}
+
 // --- Storage change listener ---
 chrome.storage.onChanged.addListener(() => {
   chrome.storage.local.get(null).then((data) => {
-    const state = data as unknown as AppState;
+    const state = withDefaults(data);
     appState = state;
     renderTimer(state);
-    renderBlocklist(state.blockedSites ?? []);
-    renderSessions(state.sessions ?? []);
+    renderBlocklist(state.blockedSites);
+    renderSessions(state.sessions);
   });
 });
 
 // --- Initial load ---
 async function load() {
   const stored = await chrome.storage.local.get(null);
-  const data = stored as unknown as AppState & { selectedMinutes?: number };
+  const data = stored as Record<string, unknown>;
 
-  if (data.selectedMinutes) selectedMinutes = data.selectedMinutes;
+  if (data.selectedMinutes) selectedMinutes = data.selectedMinutes as number;
 
-  appState = data as AppState;
+  appState = withDefaults(data);
   renderTimer(appState);
-  renderBlocklist(appState.blockedSites ?? []);
-  renderSessions(appState.sessions ?? []);
+  renderBlocklist(appState.blockedSites);
+  renderSessions(appState.sessions);
 }
 
 load();

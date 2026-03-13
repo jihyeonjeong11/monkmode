@@ -8,14 +8,12 @@ Monkmode is a browser extension that helps you focus for given time for just one
 
 ## Features
 
-- 🕒 Customizable timers for focus sessions, short breaks, and long breaks
+- 🕒 Customizable timers for focus sessions
 - ⛔ Customizable web page blocker for your session
 - 🙏 Reflection note: One liner for why you distracted
-- 📊 Session tracking and cycle progress visualization
-- 🔔 In-app notifications when timers complete
+- 📊 Session tracking
 - 🎵 Sound alerts for timer completion and button clicks
 - ❓ Comprehensive help guide with instructions and productivity tips
-- ⚡ Debug mode for testing (add `?debug=true` to URL)
 
 ## Assets
 

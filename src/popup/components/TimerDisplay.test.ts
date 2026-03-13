@@ -23,10 +23,22 @@ describe("TimerDisplay", () => {
     expect(el.textContent).toBe("00:00");
   });
 
-  test("3600초(1시간)는 60:00으로 렌더링한다", () => {
+  test("3600초(1시간)는 01:00:00으로 렌더링한다", () => {
     const el = document.getElementById("timer-display")!;
     renderTimerDisplay(el, 3600);
-    expect(el.textContent).toBe("60:00");
+    expect(el.textContent).toBe("01:00:00");
+  });
+
+  test("14400초(4시간)는 04:00:00으로 렌더링한다", () => {
+    const el = document.getElementById("timer-display")!;
+    renderTimerDisplay(el, 14400);
+    expect(el.textContent).toBe("04:00:00");
+  });
+
+  test("3661초는 01:01:01으로 렌더링한다", () => {
+    const el = document.getElementById("timer-display")!;
+    renderTimerDisplay(el, 3661);
+    expect(el.textContent).toBe("01:01:01");
   });
 
   test("endTime이 null이면 --:--를 렌더링한다", () => {
