@@ -1,45 +1,124 @@
-// @ts-nocheck — 임시 스캐폴드, Branch 3(feat/popup-timer-ui)에서 전면 교체 예정
-import type { AppState } from "../shared/types";
+import type { AppState, SessionEntry } from "../shared/types";
 import { TimerPhase } from "../shared/types";
+import { DEFAULT_FOCUS_MINUTES } from "../shared/constants";
+import { sendMessage } from "../shared/messages";
+import { renderTimerDisplay } from "./components/TimerDisplay";
+import { renderPhaseIndicator } from "./components/PhaseIndicator";
+import { renderTimerControls } from "./components/TimerControls";
 
-// --- Timer UI ---
-const phaseLabel = document.getElementById("phase-label");
-const timerDisplay = document.getElementById("timer-display");
-const startBtn = document.getElementById("start-btn");
-const pauseBtn = document.getElementById("pause-btn");
-const resetBtn = document.getElementById("reset-btn");
+// --- Stop confirmation phrase ---
+const STOP_PHRASE = "메시지를 수정해주세요";
 
+// --- DOM refs ---
+const phaseLabel = document.getElementById("phase-label") as HTMLElement;
+const timerDisplay = document.getElementById("timer-display") as HTMLElement;
+const startBtn = document.getElementById("start-btn") as HTMLButtonElement;
+const stopBtn = document.getElementById("stop-btn") as HTMLButtonElement;
+
+const durationPicker = document.getElementById("duration-picker") as HTMLElement;
+const durationBtns = durationPicker.querySelectorAll<HTMLButtonElement>("button[data-hours]");
+
+const stopConfirm = document.getElementById("stop-confirm") as HTMLElement;
+const stopPhraseEl = document.getElementById("stop-phrase") as HTMLElement;
+const stopInput = document.getElementById("stop-input") as HTMLInputElement;
+const stopCancelBtn = document.getElementById("stop-cancel-btn") as HTMLButtonElement;
+const stopOkBtn = document.getElementById("stop-ok-btn") as HTMLButtonElement;
+
+const siteInput = document.getElementById("site-input") as HTMLInputElement;
+const addBtn = document.getElementById("add-btn") as HTMLButtonElement;
+const siteList = document.getElementById("site-list") as HTMLUListElement;
+
+const sessionsSummary = document.getElementById("sessions-summary") as HTMLElement;
+const sessionsList = document.getElementById("sessions-list") as HTMLElement;
+
+const navTimer = document.getElementById("nav-timer") as HTMLButtonElement;
+const navBlocklist = document.getElementById("nav-blocklist") as HTMLButtonElement;
+const navSessions = document.getElementById("nav-sessions") as HTMLButtonElement;
+
+const tabTimer = document.getElementById("tab-timer") as HTMLElement;
+const tabBlocklist = document.getElementById("tab-blocklist") as HTMLElement;
+const tabSessions = document.getElementById("tab-sessions") as HTMLElement;
+
+// --- State ---
+let selectedMinutes = DEFAULT_FOCUS_MINUTES;
 let tickInterval: ReturnType<typeof setInterval> | null = null;
+let appState: AppState | null = null;
 
-function formatSeconds(secs: number): string {
-  const m = Math.floor(secs / 60).toString().padStart(2, "0");
-  const s = (secs % 60).toString().padStart(2, "0");
-  return `${m}:${s}`;
-}
-
-function renderTimer(state: AppState) {
-  const { phase, endTime, isRunning } = state.timer;
-
-  const phaseNames: Record<TimerPhase, string> = {
-    [TimerPhase.FOCUS]: "FOCUS",
-    [TimerPhase.SHORT_BREAK]: "SHORT BREAK",
-    [TimerPhase.LONG_BREAK]: "LONG BREAK",
-  };
-  phaseLabel.textContent = phaseNames[phase];
-
-  if (isRunning && endTime != null) {
-    const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
-    timerDisplay.textContent = formatSeconds(remaining);
-  } else {
-    timerDisplay.textContent = "--:--";
+// --- Tabs ---
+function activateTab(tab: "timer" | "blocklist" | "sessions") {
+  for (const [el, id] of [
+    [tabTimer, "timer"],
+    [tabBlocklist, "blocklist"],
+    [tabSessions, "sessions"],
+  ] as const) {
+    el.classList.toggle("active", id === tab);
+  }
+  for (const [btn, id] of [
+    [navTimer, "timer"],
+    [navBlocklist, "blocklist"],
+    [navSessions, "sessions"],
+  ] as const) {
+    btn.classList.toggle("active", id === tab);
   }
 }
 
+navTimer.addEventListener("click", () => activateTab("timer"));
+navBlocklist.addEventListener("click", () => activateTab("blocklist"));
+navSessions.addEventListener("click", () => activateTab("sessions"));
+
+// --- Duration picker ---
+function renderDurationPicker(isRunning: boolean) {
+  for (const btn of durationBtns) {
+    const hours = Number(btn.dataset.hours);
+    btn.classList.toggle("selected", hours * 60 === selectedMinutes);
+    btn.disabled = isRunning;
+  }
+}
+
+for (const btn of durationBtns) {
+  btn.addEventListener("click", () => {
+    selectedMinutes = Number(btn.dataset.hours) * 60;
+    chrome.storage.local.set({ selectedMinutes });
+    renderDurationPicker(false);
+  });
+}
+
+// --- Timer render ---
+function renderTimer(state: AppState) {
+  const { phase, endTime, isRunning } = state.timer;
+
+  if (isRunning) {
+    renderPhaseIndicator(phaseLabel, phase);
+  } else {
+    phaseLabel.textContent = "";
+  }
+
+  if (isRunning && endTime != null) {
+    const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+    renderTimerDisplay(timerDisplay, remaining);
+    startTick(endTime);
+  } else {
+    renderTimerDisplay(timerDisplay, null);
+    stopTick();
+  }
+
+  renderTimerControls({ startEl: startBtn, stopEl: stopBtn, isRunning });
+  renderDurationPicker(isRunning);
+
+  // hide stop confirm when not running
+  if (!isRunning) {
+    stopConfirm.style.display = "none";
+    stopBtn.style.display = "none";
+    startBtn.style.display = "";
+  }
+}
+
+// --- Tick ---
 function startTick(endTime: number) {
   stopTick();
   tickInterval = setInterval(() => {
     const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
-    timerDisplay.textContent = formatSeconds(remaining);
+    renderTimerDisplay(timerDisplay, remaining);
     if (remaining <= 0) stopTick();
   }, 500);
 }
@@ -51,109 +130,124 @@ function stopTick() {
   }
 }
 
-
+// --- Timer controls ---
 startBtn.addEventListener("click", () => {
-  chrome.runtime.sendMessage({ type: "START_TIMER" });
-});
-pauseBtn.addEventListener("click", () => {
-  chrome.runtime.sendMessage({ type: "PAUSE_TIMER" });
-  stopTick();
-  timerDisplay.textContent = "--:--";
-});
-resetBtn.addEventListener("click", () => {
-  chrome.runtime.sendMessage({ type: "RESET_TIMER" });
-  stopTick();
-  timerDisplay.textContent = "--:--";
+  sendMessage({ type: "START_TIMER" });
 });
 
-// --- Blocker UI ---
-const toggleBtn = document.getElementById("toggle-btn");
-const siteInput = document.getElementById("site-input") as HTMLInputElement;
-const addBtn = document.getElementById("add-btn");
-const siteList = document.getElementById("site-list");
+stopBtn.addEventListener("click", () => {
+  stopConfirm.style.display = "block";
+  stopBtn.style.display = "none";
+  stopPhraseEl.textContent = `"${STOP_PHRASE}"`;
+  stopInput.value = "";
+  stopInput.focus();
+});
 
-let isActive = false;
-let blockedSites: string[] = [];
+stopCancelBtn.addEventListener("click", () => {
+  stopConfirm.style.display = "none";
+  stopBtn.style.display = "";
+  stopInput.value = "";
+});
 
-function renderBlocker() {
-  toggleBtn.textContent = isActive ? "ON — 집중 중" : "OFF — 시작하기";
-  toggleBtn.style.background = isActive ? "#e53e3e" : "#38a169";
+stopOkBtn.addEventListener("click", confirmStop);
+stopInput.addEventListener("keydown", (e) => { if (e.key === "Enter") confirmStop(); });
 
+function confirmStop() {
+  if (stopInput.value.trim() !== STOP_PHRASE) return;
+  stopConfirm.style.display = "none";
+  stopInput.value = "";
+  sendMessage({ type: "RESET_TIMER" });
+}
+
+// --- Blocklist ---
+function renderSiteList(sites: string[]) {
   siteList.innerHTML = "";
-  if (blockedSites.length === 0) {
-    siteList.innerHTML = '<li class="empty">차단할 사이트를 추가하세요</li>';
+  if (sites.length === 0) {
+    const li = document.createElement("li");
+    li.className = "site-list-empty";
+    li.textContent = "차단할 사이트를 추가하세요";
+    siteList.appendChild(li);
     return;
   }
-  for (const site of blockedSites) {
+  for (const site of sites) {
     const li = document.createElement("li");
-    li.className = "list-item";
+    li.className = "site-item";
     li.innerHTML = `<span>${site}</span><button class="remove-btn" data-site="${site}">✕</button>`;
     siteList.appendChild(li);
   }
 }
 
-toggleBtn.addEventListener("click", async () => {
-  isActive = !isActive;
-  await chrome.storage.local.set({ isActive });
-  renderBlocker();
-});
-
 addBtn.addEventListener("click", addSite);
-siteInput.addEventListener("keydown", (e) => e.key === "Enter" && addSite());
+siteInput.addEventListener("keydown", (e) => { if (e.key === "Enter") addSite(); });
 
-async function addSite() {
-  const site = siteInput.value.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/$/, "");
-  if (!site || blockedSites.includes(site)) { siteInput.value = ""; return; }
-  blockedSites = [...blockedSites, site];
+function addSite() {
+  const site = siteInput.value.trim().toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "");
+  if (!site) return;
   siteInput.value = "";
-  await chrome.storage.local.set({ blockedSites });
-  renderBlocker();
+  sendMessage({ type: "ADD_SITE", site });
 }
 
-siteList.addEventListener("click", async (e) => {
-  const btn = (e.target as HTMLElement).closest(".remove-btn") as HTMLElement | null;
-  if (!btn) return;
-  const site = btn.dataset.site;
-  blockedSites = blockedSites.filter((s) => s !== site);
-  await chrome.storage.local.set({ blockedSites });
-  renderBlocker();
+siteList.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLElement>(".remove-btn");
+  if (!btn?.dataset.site) return;
+  sendMessage({ type: "REMOVE_SITE", site: btn.dataset.site });
 });
 
-// --- Storage change listener (real-time updates) ---
-chrome.storage.onChanged.addListener((changes) => {
-  if (!("timer" in changes) && !("sessions" in changes)) return;
+// --- Sessions ---
+function pad2(n: number) { return n.toString().padStart(2, "0"); }
 
-  chrome.storage.local.get(DEFAULT_STORAGE).then((data) => {
-    const state = data as AppState;
+function renderSessions(sessions: SessionEntry[]) {
+  const today = new Date();
+  const todaySessions = sessions.filter((s) => {
+    const d = new Date(s.startedAt);
+    return d.getFullYear() === today.getFullYear()
+      && d.getMonth() === today.getMonth()
+      && d.getDate() === today.getDate();
+  });
 
+  const totalMinutes = todaySessions.reduce((sum, s) => sum + s.durationMinutes, 0);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  sessionsSummary.textContent = `오늘 ${todaySessions.length} sessions / ${h}h ${m}m`;
+
+  sessionsList.innerHTML = "";
+  for (const s of todaySessions.slice().reverse()) {
+    const d = new Date(s.startedAt);
+    const time = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+    const item = document.createElement("div");
+    item.className = "session-item";
+    item.innerHTML = `
+      <div class="session-meta">${time}  ${s.durationMinutes}m</div>
+      <div class="session-reflection">${s.reflection ?? "(반성 없음)"}</div>
+    `;
+    sessionsList.appendChild(item);
+  }
+}
+
+// --- Storage change listener ---
+chrome.storage.onChanged.addListener(() => {
+  chrome.storage.local.get(null).then((data) => {
+    const state = data as unknown as AppState;
+    appState = state;
     renderTimer(state);
-    if (state.timer.isRunning && state.timer.endTime != null) {
-      startTick(state.timer.endTime);
-    } else {
-      stopTick();
-    }
+    renderSiteList(state.blockedSites ?? []);
+    renderSessions(state.sessions ?? []);
   });
 });
 
 // --- Initial load ---
-const DEFAULT_STORAGE = {
-  timer: { phase: TimerPhase.FOCUS, endTime: null, isRunning: false, completedPomodoros: 0 },
-  blockedSites: [] as string[],
-  isActive: false,
-  sessions: [] as unknown[],
-};
-
 async function load() {
-  const data = await chrome.storage.local.get(DEFAULT_STORAGE);
-  const state = data as AppState;
+  const stored = await chrome.storage.local.get(null);
+  const data = stored as unknown as AppState & { selectedMinutes?: number };
 
-  renderTimer(state);
-  if (state.timer.isRunning && state.timer.endTime != null) {
-    startTick(state.timer.endTime);
-  }
-  isActive = state.isActive;
-  blockedSites = state.blockedSites;
-  renderBlocker();
+  if (data.selectedMinutes) selectedMinutes = data.selectedMinutes;
+
+  appState = data as AppState;
+  renderTimer(appState);
+  renderSiteList(appState.blockedSites ?? []);
+  renderSessions(appState.sessions ?? []);
 }
 
 load();

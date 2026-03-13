@@ -4,95 +4,167 @@
   <meta charset="UTF-8" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      width: 300px;
-      padding: 16px;
-      font-family: system-ui, sans-serif;
-      background: #1a202c;
-      color: #e2e8f0;
+
+    :root {
+      --bg: #FFFFFF;
+      --fg: #0A0A0A;
+      --border: #E0E0E0;
     }
-    h1 {
-      font-size: 18px;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 16px;
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0A0A0A;
+        --fg: #FFFFFF;
+        --border: #2A2A2A;
+      }
     }
 
-    /* Timer */
-    #timer-section {
-      background: #2d3748;
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
-      margin-bottom: 16px;
+    body {
+      width: 300px;
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
     }
-    #phase-label {
-      font-size: 11px;
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Tab content */
+    .tab-panel { display: none; padding: 20px 16px; }
+    .tab-panel.active { display: block; }
+
+    /* Duration picker */
+    #duration-picker {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    #duration-picker button {
+      flex: 1;
+      padding: 8px 0;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 13px;
       font-weight: 600;
-      letter-spacing: 0.1em;
-      color: #90cdf4;
-      margin-bottom: 6px;
+      cursor: pointer;
+    }
+    #duration-picker button.selected {
+      background: var(--fg);
+      color: var(--bg);
+    }
+    #duration-picker button:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    /* Phase + Timer */
+    #phase-label {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
+      margin-bottom: 8px;
+      min-height: 16px;
     }
     #timer-display {
-      font-size: 42px;
+      text-align: center;
+      font-size: 48px;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
-      letter-spacing: 0.05em;
-      margin-bottom: 14px;
+      letter-spacing: 0.04em;
+      margin-bottom: 24px;
     }
+
+    /* Timer controls */
     #timer-controls {
+      display: flex;
+      justify-content: center;
+    }
+    #timer-controls button {
+      padding: 10px 32px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #start-btn { border-color: var(--fg); }
+
+    /* Stop confirm overlay */
+    #stop-confirm {
+      display: none;
+      text-align: center;
+    }
+    #stop-confirm p {
+      font-size: 13px;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    #stop-confirm em {
+      font-style: normal;
+      font-weight: 700;
+    }
+    #stop-input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+    #stop-confirm-actions {
       display: flex;
       gap: 8px;
       justify-content: center;
     }
-    .timer-btn {
-      padding: 6px 14px;
-      border: none;
-      border-radius: 6px;
+    #stop-confirm-actions button {
+      padding: 8px 20px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--fg);
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
     }
-    #start-btn  { background: #38a169; color: #fff; }
-    #pause-btn  { background: #d69e2e; color: #fff; }
-    #reset-btn  { background: #4a5568; color: #e2e8f0; }
 
-    /* Blocker toggle */
-    #toggle-btn {
-      display: block;
-      width: 100%;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-bottom: 16px;
-    }
-    .input-row {
+    /* Blocklist tab */
+    .site-input-row {
       display: flex;
-      gap: 8px;
-      margin-bottom: 8px;
+      gap: 6px;
+      margin-bottom: 12px;
     }
     #site-input {
       flex: 1;
-      padding: 6px 10px;
-      border-radius: 6px;
-      border: 1px solid #4a5568;
-      background: #2d3748;
-      color: #e2e8f0;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--fg);
       font-size: 13px;
     }
     #add-btn {
-      padding: 6px 12px;
-      border-radius: 6px;
-      border: none;
-      background: #4a5568;
-      color: #e2e8f0;
-      cursor: pointer;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--fg);
       font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
     }
     #site-list {
       list-style: none;
@@ -100,50 +172,126 @@
       flex-direction: column;
       gap: 4px;
     }
-    .empty {
-      font-size: 12px;
-      color: #718096;
-      text-align: center;
-      padding: 8px 0;
-    }
-    .list-item {
+    .site-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 4px 8px;
-      background: #2d3748;
-      border-radius: 6px;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
       font-size: 13px;
     }
     .remove-btn {
       background: none;
       border: none;
-      color: #fc8181;
+      color: var(--fg);
       cursor: pointer;
       font-size: 12px;
+      opacity: 0.5;
       padding: 0 2px;
     }
+    .remove-btn:hover { opacity: 1; }
+    .site-list-empty {
+      font-size: 12px;
+      color: var(--fg);
+      opacity: 0.4;
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    /* Sessions tab */
+    #sessions-summary {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    #sessions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .session-item { font-size: 13px; }
+    .session-meta {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .session-reflection {
+      opacity: 0.6;
+      font-size: 12px;
+    }
+
+    /* Bottom nav */
+    nav {
+      display: flex;
+      border-top: 1px solid var(--border);
+    }
+    nav button {
+      flex: 1;
+      padding: 10px 0;
+      border: none;
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      opacity: 0.4;
+    }
+    nav button.active { opacity: 1; }
   </style>
 </head>
 <body>
-  <h1>🧘 Monk Mode</h1>
+  <header>🧘 Monk Mode</header>
 
-  <div id="timer-section">
-    <div id="phase-label">FOCUS</div>
+  <!-- Timer tab -->
+  <div id="tab-timer" class="tab-panel active">
+    <div id="duration-picker">
+      <button data-hours="1">1h</button>
+      <button data-hours="2">2h</button>
+      <button data-hours="3">3h</button>
+      <button data-hours="4" class="selected">4h</button>
+    </div>
+
+    <div id="phase-label"></div>
     <div id="timer-display">--:--</div>
+
     <div id="timer-controls">
-      <button class="timer-btn" id="start-btn">시작</button>
-      <button class="timer-btn" id="pause-btn">일시정지</button>
-      <button class="timer-btn" id="reset-btn">리셋</button>
+      <button id="start-btn">▶ Start</button>
+      <button id="stop-btn" style="display:none">■ Stop</button>
+    </div>
+
+    <div id="stop-confirm">
+      <p>정말 멈추려면 아래 문구를 입력하세요:<br><em id="stop-phrase"></em></p>
+      <input id="stop-input" type="text" placeholder="" />
+      <div id="stop-confirm-actions">
+        <button id="stop-cancel-btn">취소</button>
+        <button id="stop-ok-btn">확인</button>
+      </div>
     </div>
   </div>
 
-  <button id="toggle-btn">로딩 중...</button>
-  <div class="input-row">
-    <input id="site-input" type="text" placeholder="youtube.com" />
-    <button id="add-btn">추가</button>
+  <!-- Blocklist tab -->
+  <div id="tab-blocklist" class="tab-panel">
+    <div class="site-input-row">
+      <input id="site-input" type="text" placeholder="youtube.com" />
+      <button id="add-btn">+</button>
+    </div>
+    <ul id="site-list"></ul>
   </div>
-  <ul id="site-list"></ul>
+
+  <!-- Sessions tab -->
+  <div id="tab-sessions" class="tab-panel">
+    <div id="sessions-summary">오늘 0 sessions / 0h 0m</div>
+    <div id="sessions-list"></div>
+  </div>
+
+  <nav>
+    <button id="nav-timer" class="active">Timer</button>
+    <button id="nav-blocklist">Blocklist</button>
+    <button id="nav-sessions">📊</button>
+  </nav>
+
   <script src="popup.js"></script>
 </body>
 </html>
