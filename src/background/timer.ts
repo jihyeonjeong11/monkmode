@@ -33,7 +33,14 @@ export async function startTimer(): Promise<void> {
   const state = await loadState();
   if (state.timer.isRunning) return;
 
-  const durationMinutes = getPhaseDurationMinutes(state.timer.phase);
+  let durationMinutes: number;
+  if (IS_TEST) {
+    durationMinutes = TEST_DURATION_SECONDS / 60;
+  } else {
+    const stored = await chrome.storage.local.get({ selectedMinutes: DEFAULT_FOCUS_MINUTES });
+    durationMinutes = (stored as { selectedMinutes: number }).selectedMinutes;
+  }
+
   state.timer.isRunning = true;
   state.timer.endTime = now + durationMinutes * 60 * 1000;
   await saveState(state);

@@ -1,6 +1,8 @@
 import { copyFileSync, mkdirSync, cpSync } from "fs";
 
 const isWatch = process.argv.includes("--watch");
+const isTestEnv = process.argv.includes("--is-test");
+const defineFlags = isTestEnv ? ["--define", "process.env.IS_TEST=\"true\""] : [];
 
 function copyAssets() {
   mkdirSync("dist/popup", { recursive: true });
@@ -27,7 +29,7 @@ const entries: [string, string, string[]][] = [
 
 if (isWatch) {
   const procs = entries.map(([entry, outfile, flags]) =>
-    Bun.spawn(["bun", "build", entry, "--outfile", outfile, "--watch", ...flags], {
+    Bun.spawn(["bun", "build", entry, "--outfile", outfile, "--watch", ...flags, ...defineFlags], {
       stdout: "inherit",
       stderr: "inherit",
     })
@@ -35,7 +37,7 @@ if (isWatch) {
   await Promise.all(procs.map((p) => p.exited));
 } else {
   for (const [entry, outfile, flags] of entries) {
-    const proc = Bun.spawnSync(["bun", "build", entry, "--outfile", outfile, ...flags], {
+    const proc = Bun.spawnSync(["bun", "build", entry, "--outfile", outfile, ...flags, ...defineFlags], {
       stdout: "inherit",
       stderr: "inherit",
     });
