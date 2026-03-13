@@ -73,28 +73,34 @@
 **의존:** `feat/shared-foundation`
 
 ### `src/popup/popup.html`
-- [ ] 기본 레이아웃: 헤더(`🧘 Monk Mode` + `[⚙]`), 콘텐츠 영역, 하단 탭 3개
-- [ ] Timer 탭 구조 마크업
-
-### `src/popup/components/PhaseIndicator.ts`
-- [ ] `FOCUS / SHORT BREAK / LONG BREAK` 텍스트 표시
-- [ ] 완료된 태스크 개수를 점(● ○)으로 표시
+- [x] 기본 레이아웃: 헤더(`🧘 Monk Mode`), 콘텐츠 영역, 하단 탭 3개
+- [x] Timer 탭 구조 마크업
 
 ### `src/popup/components/TimerDisplay.ts`
-- [ ] `remainingSeconds`를 `MM:SS` 형식으로 렌더링
-- [ ] `render(seconds: number)` 함수 export
+- [x] `seconds | null` → `MM:SS` or `--:--` 렌더링 (함수 구현됨, popup 연결 필요)
+
+### `src/popup/components/PhaseIndicator.ts`
+- [x] `FOCUS` 텍스트 표시 (함수 구현됨, popup 연결 필요)
+
+### `src/popup/components/DurationPicker.ts`
+- [x] 1h / 2h / 3h / 4h 선택 UI
+- [x] 타이머 실행 중엔 비활성화
+- [x] 선택값을 `chrome.storage.local`에 저장
 
 ### `src/popup/components/TimerControls.ts`
-- [ ] Start / Pause 버튼 (상태에 따라 전환)
-- [ ] Reset 버튼
-- [ ] Skip 버튼
-- [ ] 각 버튼 클릭 시 `sendMessage`로 background에 전달
+- [x] Start 버튼 / Stop 버튼 전환 (함수 구현됨, popup 연결 필요)
+- [x] Stop 클릭 시 확인 문구 입력 UI 표시
+- [x] 확인 문구 일치 시에만 `RESET_TIMER` 메시지 전송 (문구: "나는 지금 집중해야 한다")
+
+### CSS
+- [x] `--bg`, `--fg`, `--border` CSS 변수 적용 (라이트/다크 모노톤)
+- [x] `prefers-color-scheme: dark` 미디어 쿼리
 
 ### `src/popup/popup.ts`
-- [ ] 기존 코드 교체 — 컴포넌트 기반으로 재작성
-- [ ] `GET_STATE` 메시지로 초기 상태 로드
-- [ ] `chrome.storage.onChanged` 리스너로 실시간 UI 갱신
-- [ ] 탭 전환 로직 (Timer | Blocklist | Sessions)
+- [x] 기존 코드 교체 — 컴포넌트 기반으로 재작성
+- [x] `chrome.storage.local.get` 으로 초기 상태 로드
+- [x] `chrome.storage.onChanged` 리스너로 실시간 UI 갱신
+- [x] 탭 전환 로직 (Timer | Blocklist | Sessions)
 
 ---
 
