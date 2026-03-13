@@ -7,6 +7,7 @@ import { renderPhaseIndicator } from "./components/PhaseIndicator";
 import { renderTimerControls } from "./components/TimerControls";
 import { initSiteInput } from "./components/SiteInput";
 import { renderSiteList } from "./components/SiteList";
+import { renderSessionsView } from "./components/SessionsView";
 
 // --- Stop confirmation phrase ---
 const STOP_PHRASE = "메시지를 수정해주세요";
@@ -177,34 +178,8 @@ function renderBlocklist(sites: string[]) {
 }
 
 // --- Sessions ---
-function pad2(n: number) { return n.toString().padStart(2, "0"); }
-
 function renderSessions(sessions: SessionEntry[]) {
-  const today = new Date();
-  const todaySessions = sessions.filter((s) => {
-    const d = new Date(s.startedAt);
-    return d.getFullYear() === today.getFullYear()
-      && d.getMonth() === today.getMonth()
-      && d.getDate() === today.getDate();
-  });
-
-  const totalMinutes = todaySessions.reduce((sum, s) => sum + s.durationMinutes, 0);
-  const h = Math.floor(totalMinutes / 60);
-  const m = totalMinutes % 60;
-  sessionsSummary.textContent = `오늘 ${todaySessions.length} sessions / ${h}h ${m}m`;
-
-  sessionsList.innerHTML = "";
-  for (const s of todaySessions.slice().reverse()) {
-    const d = new Date(s.startedAt);
-    const time = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
-    const item = document.createElement("div");
-    item.className = "session-item";
-    item.innerHTML = `
-      <div class="session-meta">${time}  ${s.durationMinutes}m</div>
-      <div class="session-reflection">${s.reflection ?? "(반성 없음)"}</div>
-    `;
-    sessionsList.appendChild(item);
-  }
+  renderSessionsView({ summaryEl: sessionsSummary, listEl: sessionsList, sessions });
 }
 
 // --- Storage change listener ---
