@@ -8,7 +8,9 @@ function copyAssets() {
   copyFileSync("manifest.json", "dist/manifest.json");
   copyFileSync("src/popup/popup.html", "dist/popup/popup.html");
   copyFileSync("src/block-page/index.html", "dist/block-page.html");
+  copyFileSync("src/offscreen/offscreen.html", "dist/offscreen.html");
   cpSync("images", "dist/images", { recursive: true });
+  cpSync("src/assets", "dist/assets", { recursive: true });
   console.log("Assets copied.");
 }
 
@@ -18,6 +20,7 @@ const entries: [string, string][] = [
   ["src/background/index.ts", "dist/background.js"],
   ["src/content/index.ts", "dist/content.js"],
   ["src/popup/popup.ts", "dist/popup/popup.js"],
+  ["src/offscreen/offscreen.ts", "dist/offscreen.js"],
 ];
 
 if (isWatch) {

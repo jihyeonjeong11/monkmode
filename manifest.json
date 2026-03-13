@@ -3,7 +3,7 @@
   "name": "Focus-monkmode",
   "version": "1.0.0",
   "description": "집중이 필요할 때 방해 사이트를 차단하세요.",
-  "permissions": ["storage", "alarms", "declarativeNetRequest"],
+  "permissions": ["storage", "alarms", "declarativeNetRequest", "offscreen"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"

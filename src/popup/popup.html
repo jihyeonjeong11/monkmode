@@ -17,6 +17,48 @@
       text-align: center;
       margin-bottom: 16px;
     }
+
+    /* Timer */
+    #timer-section {
+      background: #2d3748;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    #phase-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: #90cdf4;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    #timer-display {
+      font-size: 42px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
+    }
+    #timer-controls {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+    .timer-btn {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #start-btn  { background: #38a169; color: #fff; }
+    #pause-btn  { background: #d69e2e; color: #fff; }
+    #reset-btn  { background: #4a5568; color: #e2e8f0; }
+
+    /* Blocker toggle */
     #toggle-btn {
       display: block;
       width: 100%;
@@ -85,6 +127,17 @@
 </head>
 <body>
   <h1>🧘 Monk Mode</h1>
+
+  <div id="timer-section">
+    <div id="phase-label">FOCUS</div>
+    <div id="timer-display">--:--</div>
+    <div id="timer-controls">
+      <button class="timer-btn" id="start-btn">시작</button>
+      <button class="timer-btn" id="pause-btn">일시정지</button>
+      <button class="timer-btn" id="reset-btn">리셋</button>
+    </div>
+  </div>
+
   <button id="toggle-btn">로딩 중...</button>
   <div class="input-row">
     <input id="site-input" type="text" placeholder="youtube.com" />
