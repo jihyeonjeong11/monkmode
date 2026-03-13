@@ -107,4 +107,11 @@ describe("handleAlarm", () => {
     expect(state.timer.endTime).toBeNull();
   });
 
+  test("알람 완료 후 isActive가 false가 된다", async () => {
+    await startTimer();
+    await fireMockAlarm(ALARM_NAME);
+    const state = await loadState();
+    expect(state.isActive).toBe(false);
+  });
+
 });

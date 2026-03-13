@@ -10,6 +10,7 @@ import {
   TEST_DURATION_SECONDS,
 } from "../shared/constants";
 import { loadState, saveState } from "./storage";
+import { syncDnrRules } from "./blocker";
 
 function getPhaseDurationMinutes(phase: TimerPhase): number {
   if (IS_TEST) return TEST_DURATION_SECONDS / 60;
@@ -76,7 +77,9 @@ export async function handleAlarm(alarm: chrome.alarms.Alarm): Promise<void> {
   state.timer.phase = getNextPhase(state.timer.phase, state.timer.completedPomodoros);
   state.timer.isRunning = false;
   state.timer.endTime = null;
+  state.isActive = false;
   await saveState(state);
+  await syncDnrRules(false, state.blockedSites);
 
   await playSound();
 }

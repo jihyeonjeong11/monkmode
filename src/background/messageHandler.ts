@@ -5,15 +5,30 @@ import { syncDnrRules } from "./blocker";
 export async function handleMessage(msg: Message | { type: "OFFSCREEN_DONE" }): Promise<unknown> {
   const { startTimer, pauseTimer, resetTimer } = await import("./timer");
   switch (msg.type) {
-    case "START_TIMER":
+    case "START_TIMER": {
       await startTimer();
+      const s = await loadState();
+      s.isActive = true;
+      await saveState(s);
+      await syncDnrRules(true, s.blockedSites);
       break;
-    case "PAUSE_TIMER":
+    }
+    case "PAUSE_TIMER": {
       await pauseTimer();
+      const s = await loadState();
+      s.isActive = false;
+      await saveState(s);
+      await syncDnrRules(false, s.blockedSites);
       break;
-    case "RESET_TIMER":
+    }
+    case "RESET_TIMER": {
       await resetTimer();
+      const s = await loadState();
+      s.isActive = false;
+      await saveState(s);
+      await syncDnrRules(false, s.blockedSites);
       break;
+    }
     case "GET_STATE":
       return loadState();
     case "OFFSCREEN_DONE":
