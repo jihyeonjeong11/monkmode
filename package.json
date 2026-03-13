@@ -4,6 +4,7 @@
   "description": "Monk Mode - Focus Chrome Extension",
   "scripts": {
     "dev": "bun scripts/build.ts --watch",
+    "dev:env": "bun scripts/build.ts --watch --is-test",
     "build": "bun scripts/build.ts",
     "test": "bun test"
   },

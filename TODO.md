@@ -158,11 +158,11 @@
 **의존:** `feat/shared-foundation`, `feat/block-page`
 
 ### `src/popup/popup.ts` (Sessions 탭 추가)
-- [ ] `AppState.sessions`에서 오늘 날짜 기준 필터링
-- [ ] 상단 요약: "오늘 N sessions / Xh Ym"
-- [ ] 세션 목록 렌더링:
+- [x] `AppState.sessions`에서 오늘 날짜 기준 필터링
+- [x] 상단 요약: "오늘 N sessions / Xh Ym"
+- [x] 세션 목록 렌더링:
   - 시작 시간 (HH:MM)
-  - 지속 시간 (Nm)
+  - 지속 시간 (Nm, 소수점 반올림)
   - 반성 텍스트 or "(반성 없음)"
 
 ---

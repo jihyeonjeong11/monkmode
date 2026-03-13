@@ -34,6 +34,9 @@ describe("startTimer", () => {
     expect(state.timer.endTime).toBeLessThanOrEqual(after + EFFECTIVE_FOCUS_MS);
   });
 
+  // pnpm test 는 IS_TEST=true 로 실행 → selectedMinutes 무시, 10초 타이머 사용
+  // IS_TEST=false 환경(실제 extension)에서는 selectedMinutes 를 사용함을 보장
+
   test("이미 실행 중이면 아무것도 하지 않는다", async () => {
     await startTimer();
     const first = (await loadState()).timer.endTime;
